@@ -11,20 +11,8 @@ load_dotenv()
 # Acessa a chave da API e a guarda.
 apiKey = os.getenv("GOOGLE_API_KEY")
 
-if apiKey:
-    llm = ChatGoogleGenerativeAI( # incorpora a ia nosso projeto (chama a biblioteca)
-        model="gemini-2.5-flash", # escolhe o modelo de ia
-        temperature=0.0, # controla a criativide
-        api_key= apiKey # recebe a chave de autênticação
-    )
-else:
-    print("Erro: A chave da API não foi encontrada. Verifique seu arquivo .env.")
-
-resp_test = llm.invoke("Quem é você?") # invoca a ia (chat)
-print(resp_test.content)  
-
-TRIAGEM_PROMPT = (
-    "Você é um triador de Service Desk para políticas internas da empresa Carraro Desenvolvimento. "
+TRIAGEM_PROMPT = ( # define regras de triagem (como a ia deve responder)
+    "Você é um triador de Service Desk para políticas internas da empresa RDF telecom. "
     "Dada a mensagem do usuário, retorne SOMENTE um JSON com:\n"
     "{\n"
     '  "decisao": "AUTO_RESOLVER" | "PEDIR_INFO" | "ABRIR_CHAMADO",\n'
@@ -38,31 +26,30 @@ TRIAGEM_PROMPT = (
     "Analise a mensagem e decida a ação mais apropriada."
 )
 
-class TriagemOut(BaseModel):
-    decisao: Literal["AUTO_RESOLVER", "PEDIR_INFO", "ABRIR_CHAMADO"]
-    urgencia: Literal["BAIXA", "MEDIA", "ALTA"]
-    campos_faltantes: List[str] = Field(default_factory=list)
+class TriagemOut(BaseModel): # define o formato do JSON qeu a ia deve retornar
+    decisao: Literal["AUTO_RESOLVER", "PEDIR_INFO", "ABRIR_CHAMADO"] # define os valores aceitos
+    urgencia: Literal["BAIXA", "MEDIA", "ALTA"] #
+    campos_faltantes: List[str] = Field(default_factory=list) # cria uma lista
 
-llm_triagem = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    temperature=0.0,
-    api_key= apiKey
+llm_triagem = ChatGoogleGenerativeAI( # cria a ia
+    model="gemini-2.5-flash", # modelo da ia
+    temperature=0.0, # temperatura da ia
+    api_key= apiKey # chave da api
 )
 
-triagem_chain = llm_triagem.with_structured_output(TriagemOut)
+triagem_chain = llm_triagem.with_structured_output(TriagemOut) # cria o agente de triagem e atribui configuracoes de saida
 
-def triagem(mensagem: str) -> Dict:
-    saida: TriagemOut = triagem_chain.invoke([
-        SystemMessage(content=TRIAGEM_PROMPT),
-        HumanMessage(content=mensagem)
+def triagem(mensagem: str) -> Dict: # cria a funcao de triagem reutilizavel
+    saida: TriagemOut = triagem_chain.invoke([ # TriagemOut define o tipo de sáida / triagem_chain invoca a ia (valor da variavel)
+        SystemMessage(content=TRIAGEM_PROMPT), # atribui o prompt de triagem a mensagem de resposta da ia (configura a ia)
+        HumanMessage(content=mensagem) 
     ])
 
-    return saida.model_dump()
+    return saida.model_dump() # fgarante que a saida seja um dicionario
 
 testes = ["Posso reembolsar a internet?",
           "Quero mais 5 dias de trabalho remoto. Como faço?",
-          "Posso reembolsar cursos ou treinamentos da Alura?",
-          "Quantas capivaras tem no Rio Pinheiros?"]
+          "Quantas uniformes eu tenho?"]
 
 for msg_teste in testes:
-    print(f"Pergunta: {msg_teste}\n -> Resposta: {triagem(msg_teste)}\n")
+    print(f"Pergunta: {msg_teste}\n -> Resposta: {triagem(msg_teste)}\n") # passa as perguntas uma a uma para a funçao
