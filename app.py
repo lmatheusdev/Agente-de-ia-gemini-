@@ -4,6 +4,12 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic import BaseModel, Field
 from typing import Literal, List, Dict
 from langchain_core.messages import SystemMessage, HumanMessage
+from pathlib import Path
+from langchain_community.document_loaders import PyMuPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_community.vectorstores import FAISS
+
 
 # Carrega as variáveis do arquivo .env.
 load_dotenv()
@@ -45,11 +51,50 @@ def triagem(mensagem: str) -> Dict: # cria a funcao de triagem reutilizavel
         HumanMessage(content=mensagem) 
     ])
 
-    return saida.model_dump() # fgarante que a saida seja um dicionario
+    return saida.model_dump() # garante que a saida seja um dicionario
 
 testes = ["Posso reembolsar a internet?",
-          "Quero mais 5 dias de trabalho remoto. Como faço?",
-          "Quantas uniformes eu tenho?"]
+          "Quero mais 5 dias de trabalho remoto. Como faço?"]
 
 for msg_teste in testes:
     print(f"Pergunta: {msg_teste}\n -> Resposta: {triagem(msg_teste)}\n") # passa as perguntas uma a uma para a funçao
+
+docs = [] # Cria uma lista vazia chamada docs que será usada para armazenar os documentos carregados.
+
+for n in Path("./docs/").glob("*.pdf"): # Percorre todos os arquivos PDF na pasta "docs"
+    try:
+        loader = PyMuPDFLoader(str(n)) # Converte o objeto n(documento) para uma string e armezana no loader
+        docs.extend(loader.load()) # Carrega o conteúdo do arquivo PDF usando loader.load() e adiciona os documentos 
+        # carregados à lista docs.
+        # .extend() = método que adiciona elementos ao final de uma lista existente (semelhante ao .push() em JS)
+        print(f"Carregado com sucesso arquivo {n.name}")
+    except Exception as e:
+        print(f"Erro ao carregar arquivo {n.name}: {e}")
+
+print(f"Total de documentos carregados: {len(docs)}")
+
+splitter = RecursiveCharacterTextSplitter(chunk_size=300, chunk_overlap=30) # define o tamanho dos chunks
+# chunk_size = tamanho dos chunks
+# chunk_overlap = tamanho do overlap entre os chunks
+
+chunks = splitter.split_documents(docs) # divide os documentos em chunks
+
+for chunk in chunks: # imprime os chunks
+    print(chunk)
+    print("------------------------------------")
+
+embeddings = GoogleGenerativeAIEmbeddings( # chama o modelo de ia responsavel por gerar os embeddings
+    model="models/gemini-embedding-001",
+    google_api_key= apiKey
+)
+
+vectorstore = FAISS.from_documents(chunks, embeddings) 
+# FAISS = faz a relação de similaridade entre os embeddings.
+# embeddings = chama o modelo de ia responsavel por gerar os embeddings
+
+# retriever = configura como sera feita a busca de similaridade
+retriever = vectorstore.as_retriever(search_type="similarity_score_threshold", # define o tipo de busca
+                                     search_kwargs={"score_threshold":0.3, "k": 4}) 
+                                    # define o limite de busca (intervalo de similaridade)
+
+
