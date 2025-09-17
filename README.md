@@ -50,3 +50,11 @@ O Faiss é uma biblioteca de código aberto projetada para pesquisa de similarid
 aplicativos como sistemas de recomendação e pesquisa de imagens.
 
 Ela faz a relação de similaridade entre os embeddings.
+
+## RAG - Retriever Augmented Generation
+
+RAG (Retrieval Augmented Generation) é uma técnica utilizada para ampliar a capacidade de resposta de LLMs, combinando o conhecimento
+interno do modelo de linguagem com sistemas de recuperação de informações.
+
+Ou seja, o modelo busca informações relevantes em bases de dados externas como bancos de dados ou documentos organizacionais antes de
+gerar uma resposta, permitindo acesso a dados atualizados, especializados ou muito específicos sem a necessidade de re-treinar o modelo.
