@@ -170,7 +170,8 @@ for msg_teste in testes1:
             print(f"   Trecho: {c['trecho']}")
         print("------------------------------------")
 
-class AgentState(TypedDict, total = False):
+# O AgentState funciona como cérebro temporário do agente. Ele armazena as informações que o agente precisa para executar as tarefas.
+class AgentState(TypedDict, total = False): # usa TypedDict para criar um tipo de dados personalizado
     pergunta: str
     triagem: dict
     resposta: Optional[str]
@@ -178,11 +179,11 @@ class AgentState(TypedDict, total = False):
     rag_sucesso: bool
     acao_final: str
 
-def node_triagem(state: AgentState) -> AgentState:
+def node_triagem(state: AgentState) -> AgentState: 
     print("Executando nó de triagem...")
     return {"triagem": triagem(state["pergunta"])}
 
-def node_auto_resolver(state: AgentState) -> AgentState:
+def node_auto_resolver(state: AgentState) -> AgentState: 
     print("Executando nó de auto_resolver...")
     resposta_rag = perguntar_politica_RAG(state["pergunta"])
 
@@ -221,7 +222,7 @@ def node_abrir_chamado(state: AgentState) -> AgentState:
         "acao_final": "ABRIR_CHAMADO"
     }
 
-KEYWORDS_ABRIR_TICKET = ["aprovação", "exceção", "liberação", "abrir ticket", "abrir chamado", "acesso especial"]
+KEYWORDS_ABRIR_TICKET = ["aprovação", "exceção", "liberação", "abrir ticket", "abrir chamado", "acesso especial"] 
 
 def decidir_pos_triagem(state: AgentState) -> str:
     print("Decidindo após a triagem...")
@@ -247,7 +248,7 @@ def decidir_pos_auto_resolver(state: AgentState) -> str:
     print("Rag falhou, sem keywords, vou pedir mais informações...")
     return "info"
 
-workflow = StateGraph(AgentState)
+workflow = StateGraph(AgentState) # define a estrutura do fluxo (gráfico de execução)
 
 workflow.add_node("triagem", node_triagem)
 workflow.add_node("auto_resolver", node_auto_resolver)

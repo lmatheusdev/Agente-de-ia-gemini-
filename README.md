@@ -58,3 +58,12 @@ interno do modelo de linguagem com sistemas de recuperação de informações.
 
 Ou seja, o modelo busca informações relevantes em bases de dados externas como bancos de dados ou documentos organizacionais antes de
 gerar uma resposta, permitindo acesso a dados atualizados, especializados ou muito específicos sem a necessidade de re-treinar o modelo.
+
+# Aula 3
+
+## Langgraph
+
+LangGraph é uma estrutura (framework) em Python, parte do projeto LangChain, que permite criar sistemas de inteligência artificial (IA)
+complexos e com estado, modelando fluxos de trabalho como gráficos interconectados. Ele permite a construção de agentes que raciocinam,
+planejam e agem através de múltiplas etapas e interações, sendo ideal para aplicações que exigem memória, tomada de decisão e a
+colaboração entre vários agentes.
