@@ -23,7 +23,7 @@ load_dotenv()
 apiKey = os.getenv("GOOGLE_API_KEY")
 
 TRIAGEM_PROMPT = ( # define regras de triagem (como a ia deve responder)
-    "Você é um triador de Service Desk para políticas internas da empresa RDF telecom. "
+    "Você é um triador de Service Desk para políticas internas da empresa RDF telecom."
     "Dada a mensagem do usuário, retorne SOMENTE um JSON com:\n"
     "{\n"
     '  "decisao": "AUTO_RESOLVER" | "PEDIR_INFO" | "ABRIR_CHAMADO",\n'
@@ -37,9 +37,9 @@ TRIAGEM_PROMPT = ( # define regras de triagem (como a ia deve responder)
     "Analise a mensagem e decida a ação mais apropriada."
 )
 
-class TriagemOut(BaseModel): # define o formato do JSON qeu a ia deve retornar
+class TriagemOut(BaseModel): # define o formato do JSON que a ia deve retornar
     decisao: Literal["AUTO_RESOLVER", "PEDIR_INFO", "ABRIR_CHAMADO"] # define os valores aceitos
-    urgencia: Literal["BAIXA", "MEDIA", "ALTA"] #
+    urgencia: Literal["BAIXA", "MEDIA", "ALTA"] 
     campos_faltantes: List[str] = Field(default_factory=list) # cria uma lista
 
 llm_triagem = ChatGoogleGenerativeAI( # cria a ia
@@ -158,7 +158,7 @@ def perguntar_politica_RAG(pergunta: str) -> Dict:
     return {"answer": txt, # se houver documentos relacionados, retorna a resposta
             "citacoes": formatar_citacoes(docs_relacionados, pergunta),
             "contexto_encontrado": True}
-
+"""
 for msg_teste in testes1:
     resposta = perguntar_politica_RAG(msg_teste)
     print(f"PERGUNTA: {msg_teste}")
@@ -169,6 +169,7 @@ for msg_teste in testes1:
             print(f" - Documento: {c['documento']}, Página: {c['pagina']}")
             print(f"   Trecho: {c['trecho']}")
         print("------------------------------------")
+"""
 
 # O AgentState funciona como cérebro temporário do agente. Ele armazena as informações que o agente precisa para executar as tarefas.
 class AgentState(TypedDict, total = False): # usa TypedDict para criar um tipo de dados personalizado
@@ -273,13 +274,7 @@ workflow.add_edge("abrir_chamado", END)
 
 grafo = workflow.compile()
 
-testes = ["Posso reembolsar a internet?",
-          "Quero mais 5 dias de trabalho remoto. Como faço?",
-          "Posso reembolsar cursos ou treinamentos da Alura?",
-          "É possível reembolsar certificações do Google Cloud?",
-          "Posso obter o Google Gemini de graça?",
-          "Qual é a palavra-chave da aula de hoje?",
-          "Quantas capivaras tem no Rio Pinheiros?"]
+testes = ["Posso reembolsar a internet?"]
 
 for msg_test in testes:
     resposta_final = grafo.invoke({"pergunta": msg_test})
