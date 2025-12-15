@@ -276,6 +276,10 @@ grafo = workflow.compile()
 
 testes = ["Posso reembolsar a internet?"]
 
+def run_agent(user_message: str) -> str:
+    resposta_final = grafo.invoke({"pergunta": user_message})
+    return resposta_final.get("resposta")
+
 for msg_test in testes:
     resposta_final = grafo.invoke({"pergunta": msg_test})
 

@@ -1,13 +1,21 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from services.ai_agent import run_agent
 
 router = APIRouter()
 
 class UserMessage(BaseModel):
     message: str
 
+class AgentResponse(BaseModel):
+    reply: str
+
 @router.post("/chat/send")
-async def receive_message(payload: UserMessage):
-    user_text = payload.message
-    # por agora, só confirmamos o recebimento
-    return {"received": user_text}
+async def chat(payload: UserMessage):
+    try:
+        reply = run_agent(payload.message)
+        return {"reply": reply}
+
+    except Exception as e:
+        print("ERRO NO AGENTE:", e)
+        raise HTTPException(500, "Erro no agente de IA")
